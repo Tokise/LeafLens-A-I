@@ -2,10 +2,10 @@ import React, { useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faRedo, faCamera, faStar } from '@fortawesome/free-solid-svg-icons';
 import '../css/Scan.css';
+import Navbar from '../components/Navbar';
 
-export default function Scan({ onSavePlant, onBack }) {
+export default function Scan({ scanning, onStartScan, onEndScan, onSavePlant }) {
   const videoRef = useRef(null);
-  const [scanning, setScanning] = useState(false);
   const [image, setImage] = useState(null);
   const [plantInfo, setPlantInfo] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -14,7 +14,7 @@ export default function Scan({ onSavePlant, onBack }) {
   const handleStartCamera = async () => {
     setImage(null);
     setPlantInfo(null);
-    setScanning(true);
+    if (onStartScan) onStartScan();
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       videoRef.current.srcObject = stream;
@@ -25,7 +25,6 @@ export default function Scan({ onSavePlant, onBack }) {
   const handleRetake = () => {
     setImage(null);
     setPlantInfo(null);
-    setScanning(true);
     handleStartCamera();
   };
 
@@ -39,7 +38,7 @@ export default function Scan({ onSavePlant, onBack }) {
     const dataUrl = canvas.toDataURL('image/png');
     setImage(dataUrl);
     videoRef.current.srcObject.getTracks().forEach(track => track.stop());
-    setScanning(false);
+    if (onEndScan) onEndScan();
     setLoading(true);
     setTimeout(() => {
       setPlantInfo({
@@ -60,10 +59,8 @@ export default function Scan({ onSavePlant, onBack }) {
 
   // Back button
   const handleBack = () => {
-    if (onBack) onBack();
-    setImage(null);
-    setPlantInfo(null);
-    setScanning(false);
+    if (onEndScan) onEndScan();
+    window.location.href = '/';
   };
 
   return (
@@ -82,17 +79,6 @@ export default function Scan({ onSavePlant, onBack }) {
         <div className="scan-frame-container">
           <div className="scan-frame">
             <video ref={videoRef} autoPlay className="scan-video" />
-          </div>
-          <div className="scan-navbar">
-            <button className="scan-icon" onClick={handleRetake}>
-              <FontAwesomeIcon icon={faRedo} />
-            </button>
-            <button className="scan-icon scan-capture" onClick={handleCapture}>
-              <FontAwesomeIcon icon={faCamera} />
-            </button>
-            <button className="scan-icon" onClick={handleSavePlant} disabled={!plantInfo}>
-              <FontAwesomeIcon icon={faStar} />
-            </button>
           </div>
         </div>
       )}

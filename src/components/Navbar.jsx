@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faHome,
   faCamera,
-  faLeaf,
+  faRedo,
   faStar,
   faCog,
 } from '@fortawesome/free-solid-svg-icons';
@@ -18,10 +18,31 @@ const navItems = [
   { to: '/settings', label: 'Settings', icon: faCog },
 ];
 
-export default function Navbar() {
-  const location = useLocation();
+// Custom scan navbar for camera mode
+function ScanNavBar({ onRetake, onCapture, onSave }) {
   return (
-    <nav className="navbar-mobile">
+    <nav className="scan-navbar-mobile">
+      <button className="scan-icon" onClick={onRetake}>
+        <FontAwesomeIcon icon={faRedo} />
+      </button>
+      <button className="scan-icon scan-capture" onClick={onCapture}>
+        <FontAwesomeIcon icon={faCamera} />
+      </button>
+      <button className="scan-icon" onClick={onSave}>
+        <FontAwesomeIcon icon={faStar} />
+      </button>
+    </nav>
+  );
+}
+
+export default function Navbar({ scanning, onRetake, onCapture, onSave }) {
+  const location = useLocation();
+  // Only show scan navbar if scanning is true and on scan page
+  if (location.pathname === '/scan' && scanning) {
+    return <ScanNavBar onRetake={onRetake} onCapture={onCapture} onSave={onSave} />;
+  }
+  return (
+    <nav className="navbar-mobile main-navbar">
       {navItems.map(item => (
         <Link
           key={item.to}

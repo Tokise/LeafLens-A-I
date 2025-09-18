@@ -14,6 +14,7 @@ import './App.css';
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [scanning, setScanning] = useState(false);
 
   useEffect(() => {
     const cachedUser = localStorage.getItem('leaflens_user');
@@ -27,6 +28,10 @@ function App() {
 
   if (loading) return null;
 
+  // Handlers for scan state
+  const handleStartScan = () => setScanning(true);
+  const handleEndScan = () => setScanning(false);
+
   return (
     <Router>
       <Routes>
@@ -39,7 +44,15 @@ function App() {
         />
         <Route
           path="/scan"
-          element={isLoggedIn ? <Scan /> : <Navigate to="/login" replace />}
+          element={isLoggedIn ? (
+            <Scan
+              scanning={scanning}
+              onStartScan={handleStartScan}
+              onEndScan={handleEndScan}
+            />
+          ) : (
+            <Navigate to="/login" replace />
+          )}
         />
         <Route
           path="/care"
@@ -54,7 +67,7 @@ function App() {
           element={isLoggedIn ? <About /> : <Navigate to="/login" replace />}
         />
       </Routes>
-      {isLoggedIn && <Navbar />}
+      {isLoggedIn && <Navbar scanning={scanning} />}
     </Router>
   );
 }
